@@ -3,43 +3,40 @@
 		<input type="text" placeholder="What need to be done" class="todo-input" v-model="newTodo" @keyup.enter="addTodo">
 		<!-- annimatie tobe here -->
 		<transition-group tag="div" name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-		<TodoItem v-for="(todo, index) in todosFiltered" 
+		<todo-item v-for="(todo, index) in todosFiltered" 
 		:key="todo.id" 
 		:todo="todo" 
 		:index="index" 
-		:checkAll="!anyRemaining"	
-		@removedTodo="removeTodo"
-		@finishedEdit="finishedEdit"></TodoItem>
+		:checkAll="!anyRemaining"
+		></todo-item>
 		</transition-group>
 		<div class="extra-container">
-			<div>
-				<label><input type="checkbox" :checked="!anyRemaining" @change="checkAllTodos">Check All</label>
-			</div>
-			<div>{{ remaining }} items left</div>
+			<todo-check-all :anyRemaining="anyRemaining"></todo-check-all>
+			<todo-item-remaining :remaining="remaining"></todo-item-remaining>
 		</div>
 
 		<div class="extra-container">
-			<div>
-				<button :class="{active: filter == 'all' }" @click="filter = 'all'">All</button>
-				<button :class="{active: filter == 'active' }" @click="filter = 'active'">Active</button>
-				<button :class="{active: filter == 'completed' }" @click="filter = 'completed'">Completed</button>
-			</div>
-			<div>
-				<transition name="fade">
-					<button v-if="showClearButton" @click="clearCompleted">Clear Completed</button>
-				</transition>
-			</div>
+			<todo-filter></todo-filter>
+			<todo-clear-completed :showClearButton="showClearButton"></todo-clear-completed>
 		</div>
 	</div>
 </template>
 
 <script>
 import TodoItem from "./TodoItem"
+import TodoItemRemaining from './TodoItemsRemaining'
+import TodoCheckAll from './TodoCheckAll'
+import TodoFilter from './TodoFilter'
+import TodoClearCompleted from './TodoClearCompleted'
 
 export default {
-  name: 'TodoList',
+  name: 'todo-list',
 	components: {
 		TodoItem,
+		TodoItemRemaining,
+		TodoCheckAll,
+		TodoFilter,
+		TodoClearCompleted,
 	},
   data () {
     return {
@@ -62,6 +59,13 @@ export default {
 		  }
 	  ]
     }
+  },
+  created(){
+	  eventBus.$on('removedTodo', (index) => this.removeTodo(index))
+	  eventBus.$on('finishedEdit', (todo) => this.finishedEdit(todo))
+	  eventBus.$on('allChecked', this.checkAllTodos)
+	  eventBus.$on('filterChanged', (filter) => this.filter = filter)
+	  eventBus.$on('clearCompletedTodos', this.clearCompleted)
   },
   computed:{
 	  remaining(){

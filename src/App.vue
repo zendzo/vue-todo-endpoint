@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container">
     <img src="./assets/logo.png" class="logo">
-    <TodoList/>
+    <todo-list></todo-list>
   </div>
 </template>
 

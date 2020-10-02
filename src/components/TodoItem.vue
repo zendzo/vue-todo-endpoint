@@ -7,15 +7,18 @@
 				@blur="doneEdit" @keyup.enter="doneEdit" @keyup.esc="cancelEdit" v-focus>
 			</div>
 
-      <div class="remove-item" @click="removeTodo(index)">
-				&times;
-			</div>
+      <div>
+        <button @click="pluralize">Pluralize</button>
+        <span class="remove-item" @click="removeTodo(index)">
+          &times;
+        </span>
+      </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'TodoItem',
+  name: 'todo-item',
   props: {
     todo:{
       type: Object,
@@ -39,6 +42,9 @@ export default {
       'beforeEditCache': this.todo.beforeEditCache
     }
   },
+  created(){
+    eventBus.$on('pluralize',this.handlePluralize)
+  },
   watch: {
     checkAll(){
       this.completed = this.checkAll ? true : this.todo.completed
@@ -53,7 +59,7 @@ export default {
   },
   methods:{
     removeTodo(index){
-      this.$emit('removedTodo', index)
+      eventBus.$emit('removedTodo', index)
     },
 	  editTodo(){
 		  this.beforeEditCache = this.title
@@ -64,7 +70,7 @@ export default {
 			  this.title = this.beforeEditCache
 		  } 
       this.editing = false
-      this.$emit('finishedEdit',{
+      eventBus.$emit('finishedEdit',{
         'index': this.index,
         'todo':{
           'id': this.id,
@@ -77,7 +83,13 @@ export default {
 	  cancelEdit(){
 		  this.title = this.beforeEditCache
 		  this.editing = false
-	  },
+    },
+    pluralize(){
+      eventBus.$emit('pluralize')
+    },
+    handlePluralize(){
+      this.title = this.title + 's'
+    }
   }
 }
 </script>
